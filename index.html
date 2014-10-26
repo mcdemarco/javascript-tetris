@@ -1,16 +1,20 @@
 <!DOCTYPE html> 
 <html>
 <head>
+  <!-- The bicolor javascript tetris from Jake Gordon, wbic16, Michael Lievens and now mcdemarco -->
+  <!-- My changes: drop tiles with the spacebar
+                   pass in the desired colors with the url (for integration on my site). -->
+  <!-- Github: https://github.com/mcdemarco/javascript-tetris -->
   <title>Javascript Tetris</title>
   <style>
-    body      { font-family: Helvetica, sans-serif; }
+    body      { font-family: Helvetica, sans-serif; background-color: black; }
     #tetris   { margin: 1em auto; padding: 1em; border: 4px solid black; border-radius: 10px; background-color: #F8F8F8; }
     #stats    { display: inline-block; vertical-align: top; }
-    #canvas   { display: inline-block; vertical-align: top; background: #ed002f; box-shadow: 10px 10px 10px #999; border: 2px solid #333; }
+    #canvas   { display: inline-block; vertical-align: top; background: #000000; box-shadow: 10px 10px 10px #999; border: 2px solid #333; }
     #menu     { display: inline-block; vertical-align: top; position: relative; }
     #menu p   { margin: 0.5em 0; text-align: center; }
     #menu p a { text-decoration: none; color: black; }
-    #upcoming { display: block; margin: 0 auto; background-color: #E0E0E0; }
+    #upcoming { display: block; margin: 0 auto; background-color: #b0b0b0; }
     #score    { color: red; font-weight: bold; vertical-align: middle; }
     #rows     { color: blue; font-weight: bold; vertical-align: middle; }
     #stats    { position: absolute; bottom: 0em; right: 1em; }
@@ -28,7 +32,7 @@
 
   <div id="tetris">
     <div id="menu">
-      <p id="start"><a href="javascript:play();">Press Space to Play.</a></p>
+      <p id="start"><a href="javascript:play();">Press Space to Play</a><p><p style="font-size:smaller;">Esc to Pause</p>
       <p><canvas id="upcoming"></canvas></p>
       <p>score <span id="score">00000</span></p>
       <p>rows <span id="rows">0</span></p>
@@ -39,6 +43,21 @@
   </div>
 
   <script>
+
+   function getQueryVariable(variable) {
+     var query = window.location.search.substring(1);
+     var vars = query.split("&");
+     for (var i=0;i<vars.length;i++) {
+       var pair = vars[i].split("=");
+       if(pair[0] == variable){return decodeURIComponent(pair[1]);}
+     }
+     return(false);
+   }
+
+   var invisibleLeft = getQueryVariable('left') ? getQueryVariable('left') : "#FF0000";
+   var invisibleRight = getQueryVariable('right') ? getQueryVariable('right') : "#0000FF";
+   var backgroundColor = getQueryVariable('back') ? getQueryVariable('back') : "#000000";
+   document.getElementById("canvas").style.backgroundColor = backgroundColor;
 
     //-------------------------------------------------------------------------
     // base helper methods
@@ -68,7 +87,7 @@
     //-------------------------------------------------------------------------
 
     var KEY     = { ESC: 27, SPACE: 32, LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40 },
-        DIR     = { UP: 0, RIGHT: 1, DOWN: 2, LEFT: 3, MIN: 0, MAX: 3 },
+        DIR     = { UP: 0, RIGHT: 1, DOWN: 2, LEFT: 3, DROP: 4, MIN: 0, MAX: 3 },
         canvas  = get('canvas'),
         ctx     = canvas.getContext('2d'),
         ucanvas = get('upcoming'),
@@ -109,9 +128,6 @@
     //                               0x44C0
     //
     //-------------------------------------------------------------------------
-
-    var invisibleLeft = "#330033";
-    var invisibleRight = "#00c12b";
 
     var i = { id: 'i', size: 4, blocks: [0x0F00, 0x2222, 0x00F0, 0x4444], color: invisibleLeft, color2: invisibleRight };
     var j = { id: 'j', size: 3, blocks: [0x44C0, 0x8E00, 0x6440, 0x0E20], color: invisibleLeft, color2: invisibleRight };
@@ -214,6 +230,7 @@
           case KEY.RIGHT:  actions.push(DIR.RIGHT); handled = true; break;
           case KEY.UP:     actions.push(DIR.UP);    handled = true; break;
           case KEY.DOWN:   actions.push(DIR.DOWN);  handled = true; break;
+          case KEY.SPACE:  actions.push(DIR.DROP);  handled = true; break;
           case KEY.ESC:    lose();                  handled = true; break;
         }
       }
@@ -278,7 +295,8 @@
         case DIR.LEFT:  move(DIR.LEFT);  break;
         case DIR.RIGHT: move(DIR.RIGHT); break;
         case DIR.UP:    rotate();        break;
-        case DIR.DOWN:  drop();          break;
+        case DIR.DROP:  drop(true);      break;
+        case DIR.DOWN:  drop(false);     break;
       }
     }
 
@@ -287,6 +305,7 @@
       switch(dir) {
         case DIR.RIGHT: x = x + 1; break;
         case DIR.LEFT:  x = x - 1; break;
+        case DIR.DROP:  y = y + 1; break;
         case DIR.DOWN:  y = y + 1; break;
       }
       if (unoccupied(current.type, x, y, current.dir)) {
@@ -308,7 +327,7 @@
       }
     }
 
-    function drop() {
+    function drop(fast) {
       if (!move(DIR.DOWN)) {
         addScore(10);
         dropPiece();
@@ -319,6 +338,8 @@
         if (occupied(current.type, current.x, current.y, current.dir)) {
           lose();
         }
+      } else if (fast) {
+	drop(fast);
       }
     }
 
@@ -432,6 +453,7 @@
     function drawBlock(ctx, x, y, color) {
       ctx.fillStyle = color;
       ctx.fillRect(x*dx, y*dy, dx, dy);
+      ctx.strokeStyle = backgroundColor;
       ctx.strokeRect(x*dx, y*dy, dx, dy)
     }
 

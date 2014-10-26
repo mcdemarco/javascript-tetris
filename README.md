@@ -1,23 +1,13 @@
 Javascript Tetris
 =================
 
-An HTML5 Tetris Game
+An HTML5 Tetris Game for use with anaglyph glasses.
 
- * [play the game](http://codeincomplete.com/projects/tetris/)
- * read a [blog article](http://codeincomplete.com/posts/2011/10/10/javascript_tetris/)
- * view the [source](https://github.com/jakesgordon/javascript-tetris)
+ * [play the game](http://mcdemarco.net/bicolorize/tetris/)
+ * read a [blog article](http://livingwithdiplopia.blogspot.com/2013/08/lazy-eye-anti-suppression-tetris.html)
+ * view the [source](https://github.com/mcdemarco/javascript-tetris)
 
 >> _*SUPPORTED BROWSERS*: Chrome, Firefox, Safari, Opera and IE9+_
-
-FUTURE
-======
-
- * menu
- * animation and fx
- * levels
- * high scores
- * touch support
- * music and sound fx
 
 
 License
